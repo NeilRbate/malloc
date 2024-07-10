@@ -32,10 +32,7 @@ static unsigned int	nbase(unsigned long long nbr, char *base, int *ret)
 	unsigned long long	nbr2;
 	unsigned long long	i;
 
-	if (nbr < 0)
-		nbr2 = -nbr;
-	else
-		nbr2 = nbr;
+	nbr2 = nbr;
 	i = 0;
 	while (base[i])
 		i++;

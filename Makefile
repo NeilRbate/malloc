@@ -9,11 +9,11 @@ HOST := $(shell uname -m)_$(shell uname -s)
 endif
 
 
-NAME = libft_malloc_${HOST}.so
+NAME = libft_malloc_${HOST}
 
-SRCS = src/main.c
+SRCS = src/main.c \
+			 src/init.c
 
-#gcc -shared -o libhello.so -fPIC hello.c
 LIBFT = -L. libft/libft.a 
 
 OBJS = ${SRCS:.c=.o}
@@ -25,7 +25,7 @@ all: ${NAME}
 
 ${NAME}: ${OBJS}
 	@make -C libft all
-	${CC} ${CFLAGS} ${OBJS} ${LIBFT} -shared -o ${NAME}
+	${CC} ${CFLAGS} ${OBJS} ${LIBFT} -o ${NAME}
 
 
 clean:
