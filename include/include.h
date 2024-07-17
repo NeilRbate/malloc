@@ -86,13 +86,16 @@ typedef	struct {
  * Malloc Prototype
  */
 void
-*malloc(size_t size);
+*amalloc(size_t size);
 
 /*
  * Init memory structure and page
  */
 int	
 init_memory_page(memory_struct *mmstruct);
+
+void
+test_link();
 
 
 #endif

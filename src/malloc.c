@@ -1,9 +1,15 @@
 #include "../include/include.h"
 
-memory_struct *mmstruct;
+extern memory_struct *mmstruct;
 
-void	*malloc(size_t size)
+void	test_link()
 {
+	ft_printf("LINK SUCESS !\n");
+}
+
+void	*amalloc(size_t size)
+{
+	ft_printf("coucou\n");
 	if (mmstruct->is_init != IS_INIT)
 		if (init_memory_page(mmstruct) != SUCCESS)
 			goto failure;

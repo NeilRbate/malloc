@@ -22,7 +22,7 @@ LIBFT = -L. libft/libft.a
 OBJS = ${SRCS:.c=.o}
 
 .c.o:
-	${CC} ${CFLAGS} -c -fpic $< -o ${<:.c=.o}
+	${CC} ${CFLAGS} -c -fPIC $< -o ${<:.c=.o}
 
 all: ${NAME}
 
@@ -46,6 +46,6 @@ fclean: clean
 re: fclean all
 
 test:	
-	${CC} -L/libft_malloc ${CFLAGS} -o test ${MAIN} ${LIBFT}  -L/libft_malloc	
+	${CC} ${CFLAGS} -o test ${MAIN} ${LIBFT} -Wl,-rpath=libft_malloc.so
 
 .PHONY: all clean fclean re
