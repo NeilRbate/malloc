@@ -5,7 +5,7 @@
 /*********************************************************************
  *                                                                   *
  *                                                                   *
- *								     *                     *
+ *								     *      *                                                                   *
  *		        	MALLOC 				     *
  *                                                                   *
  *                                                                   *
@@ -33,20 +33,19 @@
 
 /******************************DEFINE ZONE***************************/
 
-#define TINY_SIZE	sysconf(_SC_PAGESIZE)
-#define TINY_LENGTH	TINY_SIZE * 150
-#define SMALL_SIZE	sysconf(_SC_PAGESIZE) * 10
-#define SMALL_LENGTH	SMALL_SIZE * 150
+#define	STDOUT	1
+#define	STDERR	2
 
 #define SUCCESS	0xff
+#define FAILURE 0xDEAD
 
 
 #define MALLOC_FAIL	NULL
 #define INIT_FAILURE	1 << 3
 #define ALLOC_FAILURE	NULL
 
-#define NOT_ALLOCATED 1 << 1
-#define IS_ALLOCATED 1 << 2
+#define NOT_ALLOCATED 0
+#define IS_ALLOCATED 1 << 0
 #define IS_INIT 1 << 8
 
 
@@ -57,9 +56,8 @@
 //Memory_page
 typedef struct {
 
-	unsigned short	is_allocated;
-	size_t	alloc_size;
-	size_t	alloc_ndx;
+	short	is_allocated;
+	uint	alloc_size;
 	void	*alloc_ptr;
 
 }	memory_page;
@@ -67,35 +65,47 @@ typedef struct {
 //Memory_struct
 typedef	struct {
 
-	size_t	is_init;
-	size_t	tiny_size;
-	void	*tiny_ptr;
-	memory_page *tiny;
+	short	is_init;
+	short	page_quantity;
 
-	size_t	small_size;
+	uint	tiny_sysconf; 
+	uint	tiny_page_size;
+	uint	tiny_length;
+
+	uint	small_sysconf; 
+	uint	small_page_size;
+	uint	small_length;
+
+
+
+	void	*tiny_ptr;
+
 	void	*small_ptr;
-	memory_page *small;
 
 	size_t	large_size;
 	memory_page *large;
 
 }	memory_struct;
 
+extern	memory_struct mmstruct;
 
 /*
  * Malloc Prototype
  */
 void
-*amalloc(size_t size);
+*malloc(size_t size);
 
 /*
  * Init memory structure and page
  */
 int	
-init_memory_page(memory_struct *mmstruct);
+init_memory_page();
+
 
 void
-test_link();
+show_alloc_mem();
 
+
+/******************************TOOLS*********************************/
 
 #endif

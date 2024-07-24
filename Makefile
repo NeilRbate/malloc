@@ -1,6 +1,6 @@
 CC = gcc
 
-CFLAGS = -Wall -Wextra -Werror -fsanitize=address -g
+CFLAGS = -Wall -Wextra -Werror -g #-fsanitize=address -g
 
 HOST = $(HOSTTYPE)
 
@@ -13,11 +13,12 @@ NAME = libft_malloc_${HOST}.so
 LINKNAME = libft_malloc.so
 
 SRCS = src/malloc.c \
-       src/init.c
+       src/init.c \
+       src/tools.c
 
 MAIN = src/main.c
 
-LIBFT = -L. libft/libft.a 
+LIBFT = -L. libft/libft.a
 
 OBJS = ${SRCS:.c=.o}
 
@@ -43,9 +44,9 @@ fclean: clean
 	@rm -f ${LINKNAME}
 	@make -C libft fclean
 
-re: fclean all
+re: fclean test #all
 
-test:	
-	${CC} ${CFLAGS} -o test ${MAIN} ${LIBFT} -Wl,-rpath=libft_malloc.so
+test:	all	
+	${CC} ${CFLAGS} -o test ${MAIN} ${LIBFT} -Wl,-rpath=./ft_malloc -lft_malloc
 
 .PHONY: all clean fclean re
