@@ -45,14 +45,11 @@ show_tiny_alloc()
 
 	long int i = 0;
 	while(i < mmstruct.tiny_length) {
-		if (((memory_page *)mmstruct.tiny_ptr + i)->
-				is_allocated == IS_ALLOCATED) {
-			ft_printf("[%p] - [%p]\n", 
-					((memory_page *)mmstruct.tiny_ptr + i)->alloc_ptr,
-					((memory_page *)mmstruct.tiny_ptr + i)->alloc_ptr + 
-					((memory_page *)mmstruct.tiny_ptr + i)->alloc_size);
-			i += (sizeof(memory_page) + 
-				((memory_page *)mmstruct.tiny_ptr + i)->alloc_size + 1);
+		if (GET_ALLOCATED((uint64_t)mmstruct.tiny_ptr + i) == IS_ALLOCATED) {
+			uint64_t	*ptr = (uint64_t *)((char *)mmstruct.tiny_ptr + i + sizeof(uint64_t));
+			ft_printf("[%p] - [%p]\n", ptr, ptr + GET_ALLOCSIZE(*ptr));
+			i += (sizeof(uint64_t) + 
+					GET_ALLOCSIZE((uint64_t)mmstruct.tiny_ptr + i) + 1);
 		}
 		else
 			break;

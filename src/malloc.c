@@ -5,7 +5,15 @@ memory_struct mmstruct;
 static int
 small_alloc(size_t size)
 {
-	(void)size;
+	uint64_t	i = 0;
+	while(i < mmstruct.small_length) {
+		uint64_t	*flag = (uint64_t *)((char *)mmstruct.small_ptr + i);
+		if (*flag == NOT_ALLOCATED) {
+			*flag = size;
+			return (i + sizeof(uint64_t));
+		}
+		i += (sizeof(uint64_t) + *flag + 1);
+	}
 	return FAILURE;
 }
 
@@ -13,22 +21,14 @@ small_alloc(size_t size)
 static int
 tiny_alloc(size_t size)
 {
-	ulong	i = 0;
+	uint64_t	i = 0;
 	while(i < mmstruct.tiny_length) {
-		if (((memory_page *)mmstruct.tiny_ptr + i)->is_allocated == NOT_ALLOCATED) {
-			((memory_page *)mmstruct.tiny_ptr + i)->is_allocated = IS_ALLOCATED;
-			((memory_page *)mmstruct.tiny_ptr + i)->alloc_size = size;
-			((memory_page *)mmstruct.tiny_ptr + i)->alloc_ptr = 
-				mmstruct.tiny_ptr + i + sizeof(memory_page);
-			//ft_printf("m_p_size -> [%d] i -> [%d]  mmstruct->tiny_ptr[%p]\n",
-			//	       sizeof(memory_page),	
-			//		i,
-			//		((memory_page *)mmstruct->tiny_ptr + i)->alloc_ptr);
-			return (i + sizeof(memory_page));
+		uint64_t	*flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
+		if (*flag == NOT_ALLOCATED) {
+			*flag = size;
+			return (i + sizeof(uint64_t));
 		}
-		i += (sizeof(memory_page) + 
-		((memory_page *)mmstruct.tiny_ptr + i)->alloc_size + 1);
-
+		i += (sizeof(uint64_t) + *flag + 1);
 	}
 
 	return FAILURE;
@@ -39,15 +39,17 @@ void	*malloc(size_t size)
 	if (mmstruct.is_init != IS_INIT)
 		if (init_memory_page() != SUCCESS)
 			goto failure;
+	if (size < 1)
+		return NULL;
 	
 	int	alloc_ndx = 0;
 
 	if (size <= mmstruct.tiny_sysconf) {
 		alloc_ndx = tiny_alloc(size);
-		return (alloc_ndx != FAILURE ? mmstruct.tiny_ptr + alloc_ndx: NULL);
+		return (alloc_ndx != FAILURE ? (mmstruct.tiny_ptr + alloc_ndx) : NULL);
 	} else if (size <= mmstruct.small_sysconf) {
 		alloc_ndx = small_alloc(size);
-		//return (alloc_ndx != FAILURE ? mmstruct->small[alloc_ndx].alloc_ptr : NULL);
+		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
 	} else {
 		//goto large alloc
 		ft_printf("Large alloc\n");

@@ -48,28 +48,22 @@ failure:
 static int
 init_mmstruct()
 {	
-	/*
-	mmstruct = (memory_struct *)mmap(NULL, sizeof(memory_struct *), 
-			PROT_READ | PROT_WRITE , 
-			MAP_ANON | MAP_PRIVATE, -1, 0);
-	if (mmstruct == MAP_FAILED)
-		goto failure;
-
-		*/
 	mmstruct.page_quantity = 100;
 
-	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE);
-	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(memory_page);
+	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 5;
+	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(uint64_t);
 	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;	
 
-	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE);
-	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(memory_page);
+	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 10;
+	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t);
 	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;	
 
+	/*
 	ft_printf("tiny_sysconf -> %d tiny_page_size -> %d tiny_length -> %d\n",
 			mmstruct.tiny_sysconf,
 			mmstruct.tiny_page_size,
 			mmstruct.tiny_length);
+			*/
 	return SUCCESS;
 }
 

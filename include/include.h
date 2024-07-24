@@ -46,21 +46,22 @@
 
 #define NOT_ALLOCATED 0
 #define IS_ALLOCATED 1 << 0
+#define ALLOCPTR_MASK (0x1FFFFFFFE)
+#define ALLOCSIZE_MASK (0xFFFFFFFE00000000)
+
+#define GET_ALLOCATED(i)	((i) & IS_ALLOCATED)
+#define GET_ALLOCSIZE(i)	((i) & ALLOCSIZE_MASK)
+
+
+#define SET_ALLOCSIZE(i, j) ((i) = ((i) & ~ALLOCSIZE_MASK) | (((j) << 1) & ALLOCSIZE_MASK))
+#define SET_ALLOCATED(i)   ((i) |= IS_ALLOCATED)
+
 #define IS_INIT 1 << 8
 
 
 
 /******************************PROTO*********************************/
 
-
-//Memory_page
-typedef struct {
-
-	short	is_allocated;
-	uint	alloc_size;
-	void	*alloc_ptr;
-
-}	memory_page;
 
 //Memory_struct
 typedef	struct {
@@ -76,18 +77,15 @@ typedef	struct {
 	uint	small_page_size;
 	uint	small_length;
 
-
-
 	void	*tiny_ptr;
 
 	void	*small_ptr;
 
 	size_t	large_size;
-	memory_page *large;
 
 }	memory_struct;
 
-extern	memory_struct mmstruct;
+extern	memory_struct	mmstruct;
 
 /*
  * Malloc Prototype
