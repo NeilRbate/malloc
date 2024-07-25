@@ -43,6 +43,16 @@ static	void
 show_tiny_alloc()
 {
 
+	uint64_t	i = 0;
+	while(i < mmstruct.tiny_length) {
+		uint64_t	*flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
+		if (*flag != NOT_ALLOCATED) {
+			ft_printf("[%p]\n", flag);
+		}
+		i += (sizeof(uint64_t) + *flag + 1);
+	}
+	/*
+
 	long int i = 0;
 	while(i < mmstruct.tiny_length) {
 		if (GET_ALLOCATED((uint64_t)mmstruct.tiny_ptr + i) == IS_ALLOCATED) {
@@ -54,6 +64,7 @@ show_tiny_alloc()
 		else
 			break;
 	}
+	*/
 
 
 /*
