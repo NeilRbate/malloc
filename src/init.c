@@ -50,11 +50,11 @@ init_mmstruct()
 {	
 	mmstruct.page_quantity = 100;
 
-	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 5;
+	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4;
 	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(uint64_t);
-	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;	
+	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;
 
-	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 10;
+	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16;
 	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t);
 	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;	
 

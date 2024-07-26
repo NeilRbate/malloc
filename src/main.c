@@ -26,13 +26,19 @@ int	main()
 	*/
 	int i = 0;
 	char *addr;
-while (i < 1024)
+while (i < 10)
 {
-	ft_printf("%d\n", i);
 addr = (char*)malloc(1024);
-ft_printf("addr ->[%p]", addr);
+addr[0] = 42;
+i++;
+}
+i = 0;
+while (i < 10)
+{
+addr = (char*)malloc(17200);
 addr[0] = 42;
 i++;
 } 
+show_alloc_mem();
 	return 0;
 }

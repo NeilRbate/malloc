@@ -3,6 +3,14 @@
 memory_struct mmstruct;
 
 static int
+large_alloc(size_t size)
+{
+	//TOD()O
+	(void)size;
+	return FAILURE;
+}
+
+static int
 small_alloc(size_t size)
 {
 	uint64_t	i = 0;
@@ -30,11 +38,11 @@ tiny_alloc(size_t size)
 		}
 		i += (sizeof(uint64_t) + *flag + 1);
 	}
-
 	return FAILURE;
 }
 
-void	*malloc(size_t size)
+void	
+*malloc(size_t size)
 {
 	if (mmstruct.is_init != IS_INIT)
 		if (init_memory_page() != SUCCESS)
@@ -46,13 +54,14 @@ void	*malloc(size_t size)
 
 	if (size <= mmstruct.tiny_sysconf) {
 		alloc_ndx = tiny_alloc(size);
-		return (alloc_ndx != FAILURE ? (mmstruct.tiny_ptr + alloc_ndx) : NULL);
+		return (alloc_ndx != FAILURE ? mmstruct.tiny_ptr + alloc_ndx : NULL);
 	} else if (size <= mmstruct.small_sysconf) {
 		alloc_ndx = small_alloc(size);
 		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
 	} else {
-		//goto large alloc
-		ft_printf("Large alloc\n");
+		alloc_ndx = large_alloc(size);
+		//TODO Change to large_array
+		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
 	}
 
 
