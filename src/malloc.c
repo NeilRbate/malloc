@@ -2,10 +2,16 @@
 
 memory_struct mmstruct;
 
-static int
+static uint64_t
 large_alloc(size_t size)
 {
-	//TOD()O
+	if(mmstruct.large_ptr == NULL) {
+		//alloc
+	} else {
+		//find last
+		//alloc
+	}
+	
 	(void)size;
 	return FAILURE;
 }
@@ -59,9 +65,8 @@ void
 		alloc_ndx = small_alloc(size);
 		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
 	} else {
-		alloc_ndx = large_alloc(size);
-		//TODO Change to large_array
-		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
+		uint64_t	large_ptr = large_alloc(size);
+		return (large_ptr != FAILURE ? (void *)large_ptr : NULL);
 	}
 
 

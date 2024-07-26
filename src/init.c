@@ -15,6 +15,9 @@ init_mmap()
 {
 	void	*tiny, *small;
 
+	if(mmstruct.rlim.rlim_max < (mmstruct.tiny_length + mmstruct.small_length))
+		goto failure;
+
 	tiny = mmap(NULL, mmstruct.tiny_length, 
 			PROT_READ | PROT_WRITE , 
 			MAP_PRIVATE | MAP_ANON, -1, 0);
@@ -33,7 +36,6 @@ init_mmap()
 
 	mmstruct.tiny_ptr = tiny;
 	mmstruct.small_ptr = small;
-	mmstruct.large_size = 0;
 	mmstruct.tiny_ptr = tiny;
 	mmstruct.small_ptr = small;
 			
@@ -48,6 +50,10 @@ failure:
 static int
 init_mmstruct()
 {	
+
+	if (getrlimit(RLIMIT_DATA, &mmstruct.rlim) != 0)
+		return INIT_FAILURE;
+
 	mmstruct.page_quantity = 100;
 
 	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4;
@@ -58,12 +64,6 @@ init_mmstruct()
 	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t);
 	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;	
 
-	/*
-	ft_printf("tiny_sysconf -> %d tiny_page_size -> %d tiny_length -> %d\n",
-			mmstruct.tiny_sysconf,
-			mmstruct.tiny_page_size,
-			mmstruct.tiny_length);
-			*/
 	return SUCCESS;
 }
 
@@ -81,6 +81,7 @@ init_memory_page()
 		goto failure;
 
 	mmstruct.is_init = IS_INIT;
+	mmstruct.large_ptr = NULL; 
 
 	return SUCCESS;
 
