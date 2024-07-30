@@ -5,23 +5,34 @@ memory_struct mmstruct;
 static uint64_t
 large_alloc(size_t size)
 {
+	//Check heap limit
+	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
+    	if (size > mmstruct.rlim.rlim_max)
+        	return FAILURE;
+
 	if(mmstruct.large_ptr == NULL) {
-		//alloc
+		mmstruct.large_ptr = large_mmap(size);
+		return mmstruct.large_ptr ? (uint64_t)mmstruct.large_ptr->alloc_ptr : FAILURE;
 	} else {
-		//find last
-		//alloc
+		void	*alloc = get_last_alloc();
+		if (!alloc)
+			return FAILURE;
+		((l_ptr *)alloc)->next = large_mmap(size);
+		alloc = ((l_ptr *)alloc)->next;
+		return alloc ? (uint64_t)((l_ptr *)alloc)->alloc_ptr : FAILURE;
 	}
 	
-	(void)size;
 	return FAILURE;
 }
 
 static int
 small_alloc(size_t size)
 {
-	uint64_t	i = 0;
+	uint64_t	i = 0,
+		       	*flag = 0;
+
 	while(i < mmstruct.small_length) {
-		uint64_t	*flag = (uint64_t *)((char *)mmstruct.small_ptr + i);
+		flag = (uint64_t *)((char *)mmstruct.small_ptr + i);
 		if (*flag == NOT_ALLOCATED) {
 			*flag = size;
 			return (i + sizeof(uint64_t));
@@ -35,9 +46,11 @@ small_alloc(size_t size)
 static int
 tiny_alloc(size_t size)
 {
-	uint64_t	i = 0;
+	uint64_t	i = 0, 
+		       	*flag = 0;
+
 	while(i < mmstruct.tiny_length) {
-		uint64_t	*flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
+		flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
 		if (*flag == NOT_ALLOCATED) {
 			*flag = size;
 			return (i + sizeof(uint64_t));
@@ -50,13 +63,13 @@ tiny_alloc(size_t size)
 void	
 *malloc(size_t size)
 {
+	int	alloc_ndx = 0;
+
 	if (mmstruct.is_init != IS_INIT)
 		if (init_memory_page() != SUCCESS)
 			goto failure;
 	if (size < 1)
-		return NULL;
-	
-	int	alloc_ndx = 0;
+		goto failure;
 
 	if (size <= mmstruct.tiny_sysconf) {
 		alloc_ndx = tiny_alloc(size);

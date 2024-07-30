@@ -1,16 +1,7 @@
 #ifndef __MALLOC__
 #define __MALLOC__
 
-
-/*********************************************************************
- *                                                                   *
- *                                                                   *
- *								                                                   *
- *		        	MALLOC 				                                       *
- *                                                                   *
- *                                                                   *
- *                                                                   *
- ********************************************************************/ 
+/*********************************MALLOC*****************************/
 
 /******************************INCLUDE ZONE**************************/
 
@@ -39,7 +30,6 @@
 #define SUCCESS	0xff
 #define FAILURE 0xDEAD
 
-
 #define MALLOC_FAIL	NULL
 #define INIT_FAILURE	1 << 3
 #define ALLOC_FAILURE	NULL
@@ -47,8 +37,6 @@
 #define NOT_ALLOCATED 0
 #define IS_ALLOCATED 1 << 0
 #define IS_INIT 1 << 8
-
-
 
 /******************************PROTO*********************************/
 
@@ -71,10 +59,12 @@ typedef	struct {
 	uint	tiny_sysconf; 
 	uint	tiny_page_size;
 	uint	tiny_length;
+	uint64_t	tiny_max;
 
 	uint	small_sysconf; 
 	uint	small_page_size;
 	uint	small_length;
+	uint64_t	small_max;
 
 	void	*tiny_ptr;
 	void	*small_ptr;
@@ -92,14 +82,35 @@ void
 *malloc(size_t size);
 
 /*
+ * Free Prototype
+ */
+void	
+free(void *ptr);
+
+
+/*
  * Init memory structure and page
  */
 int	
 init_memory_page();
 
-
+/*
+ * Display allocation zone memory address and map
+ */
 void
 show_alloc_mem();
+
+/*
+ * Alloc memory for large zone
+ */
+void
+*large_mmap(size_t size);
+
+/*
+ * Return last allocation struct on large zone
+ */
+l_ptr
+*get_last_alloc();
 
 
 /******************************TOOLS*********************************/

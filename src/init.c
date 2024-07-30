@@ -3,9 +3,8 @@
 static int
 fill_mempage()
 {
-	ft_memset(mmstruct.tiny_ptr, 0, mmstruct.tiny_length);	
-
-	ft_memset(mmstruct.small_ptr, 0, mmstruct.small_length);	
+	ft_bzero(mmstruct.tiny_ptr, mmstruct.tiny_length);
+	ft_bzero(mmstruct.small_ptr, mmstruct.small_length);
 
 	return SUCCESS;
 }
@@ -34,11 +33,11 @@ init_mmap()
 		goto failure;
 	}
 
-	mmstruct.tiny_ptr = tiny;
 	mmstruct.small_ptr = small;
+	mmstruct.small_max = (uint64_t)((char *)small + mmstruct.small_length);
+
 	mmstruct.tiny_ptr = tiny;
-	mmstruct.small_ptr = small;
-			
+	mmstruct.tiny_max = (uint64_t)((char *)tiny + mmstruct.tiny_length);
 
 	return SUCCESS;
 
@@ -56,13 +55,13 @@ init_mmstruct()
 
 	mmstruct.page_quantity = 100;
 
-	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4;
-	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(uint64_t);
-	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;
+	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4; // 4 * 4096 = 16384 Bytes
+	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(uint64_t); // 16384 + 8 = 16392 Bytes
+	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;// 1639200 Bytes
 
-	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16;
-	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t);
-	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;	
+	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16; // 16 * 4096 = 65536 Bytes
+	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t); // 65536 + 8 = 65544 Bytes
+	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;// 6554400 Bytes
 
 	return SUCCESS;
 }
@@ -70,13 +69,11 @@ init_mmstruct()
 int	
 init_memory_page()
 {
-	//Init mmap for tiny and small
+	//Init mmap for tiny and small allocation
 	if (init_mmstruct() == INIT_FAILURE)
 		goto failure;
 	if (init_mmap() == INIT_FAILURE)
 		goto failure;
-	//if (init_mempage() == INIT_FAILURE)
-	//	goto failure;
 	if (fill_mempage() == INIT_FAILURE)
 		goto failure;
 

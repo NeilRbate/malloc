@@ -14,7 +14,9 @@ LINKNAME = libft_malloc.so
 
 SRCS = src/malloc.c \
        src/init.c \
-       src/tools.c
+       src/tools.c \
+       src/largealloc.c \
+       src/free.c
 
 MAIN = src/main.c
 
