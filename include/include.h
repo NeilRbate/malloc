@@ -43,8 +43,9 @@
 //Large allocation struct
 typedef struct {
 
-	void			*alloc_ptr;
-	void			*next;
+	void	*alloc_ptr;
+	void	*next;
+	size_t	size;
 
 }	l_ptr;
 
@@ -84,8 +85,10 @@ void
 /*
  * Free Prototype
  */
+/*
 void	
 free(void *ptr);
+*/
 
 
 /*

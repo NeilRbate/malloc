@@ -38,21 +38,28 @@ i++;
 }
 i = 0;
 */
-addr1 = (char*)malloc(1024);
-addr2 = (char*)malloc(1024);
-addr3 = (char*)malloc(1024);
-addr4 = (char*)malloc(1024);
-addr5 = (char*)malloc(1024);
+addr1 = malloc(102400);
+addr2 = malloc(102400);
+addr3 = malloc(102400);
+addr4 = malloc(102400);
+addr5 = malloc(102400);
 addr1[0] = 'A';
 addr2[0] = 'B';
 addr3[0] = 'C';
 addr4[0] = 'D';
 addr5[0] = 'E';
 show_alloc_mem();
-ft_printf("%s\n%s\n%s\n%s\n", addr1, addr3, addr4, addr5);
-free(addr2);
+//ft_printf("%s\n%s\n%s\n%s\n", addr1, addr3, addr4, addr5);
+free(addr5);
 show_alloc_mem();
-ft_printf("%s\n%s\n%s\n%s\n", addr1, addr3, addr4, addr5);
+int i = 0;
+while (i < 2000) {
+	char *a = malloc(1020000);
+	a[0] = 'B';
+	i++;
+}
+show_alloc_mem();
+//ft_printf("%s\n%s\n%s\n%s\n", addr1, addr3, addr4, addr5);
 /*
 char *addr = malloc(100000);
 char *addr2 = malloc(100000);

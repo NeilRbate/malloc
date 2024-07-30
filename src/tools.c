@@ -3,7 +3,22 @@
 static	void
 show_large_alloc()
 {
-	//TODO
+	uint64_t	i = 0;
+	l_ptr	*ptr = mmstruct.large_ptr;
+
+	while(ptr) {
+		if (ptr && ptr->alloc_ptr) {
+			if (i == 0)
+				ft_printf("LARGE :\n\n");
+			i++;
+			ft_printf("        [%p]: [%p] - [%p] : %d Bytes\n", 
+				ptr,
+				ptr->alloc_ptr, 
+				ptr->alloc_ptr + ptr->size, 
+				ptr->alloc_ptr + ptr->size - ptr->alloc_ptr);
+		}
+		ptr = ptr->next;
+	}
 }
 
 static	void
@@ -19,7 +34,7 @@ show_small_alloc()
 
 		if (*flag == NOT_ALLOCATED) {
 			if (i != 0)
-				ft_printf("Total used: [%d Bytes/ %d Bytes]\n", 
+				ft_printf("Total used in Small Zone: [%d Bytes/ %d Bytes]\n", 
 					i,
 					(mmstruct.small_max - (uint64_t)mmstruct.small_ptr));
 			return;
@@ -56,7 +71,7 @@ show_tiny_alloc()
 		flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
 		if (*flag == NOT_ALLOCATED) {
 			if (i != 0)
-				ft_printf("Total used: [%d Bytes/ %d Bytes]\n", 
+				ft_printf("Total used in Tiny Zone: [%d Bytes/ %d Bytes]\n", 
 					i,
 					(mmstruct.tiny_max - (uint64_t)mmstruct.tiny_ptr));
 			return;

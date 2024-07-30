@@ -15,6 +15,7 @@ void
 	large_ptr = (l_ptr *)mmap_ptr;
 	large_ptr->alloc_ptr = mmap_ptr + sizeof(l_ptr);
 	large_ptr->next = NULL;
+	large_ptr->size = size + sizeof(l_ptr);
 
 	return mmap_ptr;
 failure:
