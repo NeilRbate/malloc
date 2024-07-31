@@ -24,74 +24,39 @@ show_large_alloc()
 static	void
 show_small_alloc()
 {
-	uint64_t	i = 0, 
-			alloc_start = 0, 
-			alloc_end = 0, 
-			*flag;
+	uint	i = 0;
+	s_ptr	*current;
 
-	while(i < mmstruct.small_length) {
-		flag = (uint64_t *)((char *)mmstruct.small_ptr + i);
+	current = mmstruct.small_ptr;
 
-		if (*flag == NOT_ALLOCATED) {
-			if (i != 0)
-				ft_printf("Total used in Small Zone: [%d Bytes/ %d Bytes]\n", 
-					i,
-					(mmstruct.small_max - (uint64_t)mmstruct.small_ptr));
-			return;
+	while (current) {
+		if (current && current->block[0] != 0) {
+			if (i == 0) {
+				ft_printf("SMALL : [%p]\n", mmstruct.small_ptr);
+				i++;
+			}
+			ft_printf("        [%p]\n", current + sizeof(s_ptr));
 		}
-
-		if (i == 0) 
-			ft_printf("SMALL : [%p] - [%p] : [%dMBytes]\n\n", mmstruct.small_ptr
-					, mmstruct.small_max,
-					(mmstruct.small_max - (uint64_t)mmstruct.small_ptr)
-					/ 100000);
-
-		alloc_start = (uint64_t)mmstruct.small_ptr + i + sizeof(uint64_t);
-		alloc_end	= (uint64_t)mmstruct.small_ptr + i + sizeof(uint64_t) + *flag;
-
-		ft_printf("        [%p] - [%p] : %d bytes\n", 
-				alloc_start, 
-				alloc_end, 
-				alloc_end - alloc_start);
-
-		i += (sizeof(uint64_t) + *flag + 1);
+		current = current->next;
 	}
 }
 
 static	void
 show_tiny_alloc()
 {
+	uint	i = 0;
+	s_ptr	*current;
 
-	uint64_t	i = 0, 
-			alloc_start = 0, 
-			alloc_end = 0, 
-			*flag;
-
-	while(i < mmstruct.tiny_length) {
-		flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
-		if (*flag == NOT_ALLOCATED) {
-			if (i != 0)
-				ft_printf("Total used in Tiny Zone: [%d Bytes/ %d Bytes]\n", 
-					i,
-					(mmstruct.tiny_max - (uint64_t)mmstruct.tiny_ptr));
-			return;
+	current = mmstruct.tiny_ptr;
+	while (current) {
+		if (current && current->block[0] != 0) {
+			if (i == 0) {
+				ft_printf("TINY :  [%p]\n", mmstruct.tiny_ptr);
+				i++;
+			}
+			ft_printf("        [%p]\n", current + sizeof(s_ptr));
 		}
-		if (i == 0) 
-			ft_printf("TINY  : [%p] - [%p] : [%dMBytes]\n", 
-					mmstruct.tiny_ptr, 
-					mmstruct.tiny_max,
-					(mmstruct.tiny_max - (uint64_t)mmstruct.tiny_ptr)
-					/ 100000);
-
-		alloc_start = (uint64_t)mmstruct.tiny_ptr + i + sizeof(uint64_t);
-		alloc_end = (uint64_t)mmstruct.tiny_ptr + i + sizeof(uint64_t) + *flag;
-
-		ft_printf("        [%p] - [%p] : [%dBytes]\n", 
-				alloc_start, 
-				alloc_end, 
-				alloc_end - alloc_start);
-
-		i += (sizeof(uint64_t) + *flag + 1);
+		current = current->next;
 	}
 }
 

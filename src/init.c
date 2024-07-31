@@ -1,20 +1,45 @@
 #include "../include/include.h"
 
-static int
-fill_mempage()
+s_ptr
+*init_small()
 {
-	ft_bzero(mmstruct.tiny_ptr, mmstruct.tiny_length);
-	ft_bzero(mmstruct.small_ptr, mmstruct.small_length);
+	void	*small;
+	uint64_t	i = 0;
 
-	return SUCCESS;
+	if(mmstruct.rlim.rlim_max < mmstruct.small_length)
+		goto failure;
+
+	small = mmap(NULL, mmstruct.small_length,
+			PROT_READ | PROT_WRITE , 
+			MAP_PRIVATE | MAP_ANON, -1, 0);
+
+	if (small == MAP_FAILED)
+		goto failure;
+
+	while (i < mmstruct.small_length) {
+		if (((small + i) + mmstruct.small_page_size) 
+				>= small + mmstruct.small_length)
+			((s_ptr *)(small + i))->next = NULL;
+		else
+			((s_ptr *)(small + i))->next = (small + i) + mmstruct.small_page_size;
+		for(int j = 0; j < 16; j++) 
+			((s_ptr *)(small + i))->block[j] = 0;
+		i += mmstruct.small_page_size;
+	}
+
+	return small;
+
+failure:
+	return ALLOC_FAILURE;
 }
 
-static int	
-init_mmap()
+s_ptr
+*init_tiny()
 {
-	void	*tiny, *small;
+	void	*tiny;
+	uint64_t	i = 0;
 
-	if(mmstruct.rlim.rlim_max < (mmstruct.tiny_length + mmstruct.small_length))
+	if(mmstruct.rlim.rlim_max < mmstruct.tiny_length)
 		goto failure;
 
 	tiny = mmap(NULL, mmstruct.tiny_length, 
@@ -24,64 +49,43 @@ init_mmap()
 	if (tiny == MAP_FAILED)
 		goto failure;
 
-	small = mmap(NULL, mmstruct.small_length,
-			PROT_READ | PROT_WRITE , 
-			MAP_PRIVATE | MAP_ANON, -1, 0);
-
-	if (small == MAP_FAILED) {
-		munmap(tiny, mmstruct.tiny_length);
-		goto failure;
+	while (i < mmstruct.tiny_length) {
+		if (((tiny + i) + mmstruct.tiny_page_size) 
+				>= tiny + mmstruct.tiny_length)
+			((s_ptr *)(tiny + i))->next = NULL;
+		else
+			((s_ptr *)(tiny + i))->next = (tiny + i) + mmstruct.tiny_page_size;
+		for(int j = 0; j < 16; j++) 
+			((s_ptr *)(tiny + i))->block[j] = 0;
+		i += mmstruct.tiny_page_size;
 	}
 
-	mmstruct.small_ptr = small;
-	mmstruct.small_max = (uint64_t)((char *)small + mmstruct.small_length);
-
-	mmstruct.tiny_ptr = tiny;
-	mmstruct.tiny_max = (uint64_t)((char *)tiny + mmstruct.tiny_length);
-
-	return SUCCESS;
+	return tiny;
 
 failure:
-	return INIT_FAILURE;
+	return ALLOC_FAILURE;
 
 }
 
-static int
+int
 init_mmstruct()
 {	
 
 	if (getrlimit(RLIMIT_DATA, &mmstruct.rlim) != 0)
 		return INIT_FAILURE;
 
-	mmstruct.page_quantity = 100;
+	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4;
+	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(s_ptr);
+	mmstruct.tiny_length = mmstruct.tiny_page_size * 100;
 
-	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4; // 4 * 4096 = 16384 Bytes
-	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(uint64_t); // 16384 + 8 = 16392 Bytes
-	mmstruct.tiny_length = mmstruct.tiny_page_size * mmstruct.page_quantity;// 1639200 Bytes
+	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16;
+	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(s_ptr);
+	mmstruct.small_length = mmstruct.small_page_size * 100;
 
-	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16; // 16 * 4096 = 65536 Bytes
-	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(uint64_t); // 65536 + 8 = 65544 Bytes
-	mmstruct.small_length = mmstruct.small_page_size * mmstruct.page_quantity;// 6554400 Bytes
-
-	return SUCCESS;
-}
-
-int	
-init_memory_page()
-{
-	//Init mmap for tiny and small allocation
-	if (init_mmstruct() == INIT_FAILURE)
-		goto failure;
-	if (init_mmap() == INIT_FAILURE)
-		goto failure;
-	if (fill_mempage() == INIT_FAILURE)
-		goto failure;
-
-	mmstruct.is_init = IS_INIT;
+	mmstruct.tiny_ptr = NULL;
+	mmstruct.small_ptr = NULL;
 	mmstruct.large_ptr = NULL; 
+	mmstruct.is_init = IS_INIT;
 
 	return SUCCESS;
-
-failure:
-	return INIT_FAILURE;
 }

@@ -25,63 +25,43 @@ large_alloc(size_t size)
 	return FAILURE;
 }
 
-static int
-small_alloc(size_t size)
+static void
+*small_alloc(size_t size)
 {
-	uint64_t	i = 0,
-		       	*flag = 0;
-
-	while(i < mmstruct.small_length) {
-		flag = (uint64_t *)((char *)mmstruct.small_ptr + i);
-		if (*flag == NOT_ALLOCATED) {
-			*flag = size;
-			return (i + sizeof(uint64_t));
-		}
-		i += (sizeof(uint64_t) + *flag + 1);
-	}
-	return FAILURE;
+	(void)size;
+	return ALLOC_FAILURE;
 }
 
 
-static int
-tiny_alloc(size_t size)
+static void
+*tiny_alloc(size_t size)
 {
-	uint64_t	i = 0, 
-		       	*flag = 0;
-
-	while(i < mmstruct.tiny_length) {
-		flag = (uint64_t *)((char *)mmstruct.tiny_ptr + i);
-		if (*flag == NOT_ALLOCATED) {
-			*flag = size;
-			return (i + sizeof(uint64_t));
-		}
-		i += (sizeof(uint64_t) + *flag + 1);
-	}
-	return FAILURE;
+	(void)size;
+	return ALLOC_FAILURE;
 }
 
 void	
 *malloc(size_t size)
 {
-	int	alloc_ndx = 0;
-
-	if (mmstruct.is_init != IS_INIT)
-		if (init_memory_page() != SUCCESS)
-			goto failure;
 	if (size < 1)
 		goto failure;
 
+	if (mmstruct.is_init != IS_INIT)
+		if (init_mmstruct() != SUCCESS)
+			goto failure;
+
 	if (size <= mmstruct.tiny_sysconf) {
-		alloc_ndx = tiny_alloc(size);
-		return (alloc_ndx != FAILURE ? mmstruct.tiny_ptr + alloc_ndx : NULL);
+		if (mmstruct.tiny_ptr == NULL)
+			mmstruct.tiny_ptr = init_tiny();
+		return tiny_alloc(size);
 	} else if (size <= mmstruct.small_sysconf) {
-		alloc_ndx = small_alloc(size);
-		return (alloc_ndx != FAILURE ? mmstruct.small_ptr + alloc_ndx : NULL);
+		if (mmstruct.small_ptr == NULL)
+			mmstruct.small_ptr = init_small();
+		return small_alloc(size);
 	} else {
 		uint64_t	large_ptr = large_alloc(size);
 		return (large_ptr != FAILURE ? (void *)large_ptr : NULL);
 	}
-
 
 failure:
 	return MALLOC_FAIL;

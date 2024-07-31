@@ -57,7 +57,7 @@ free(void *ptr)
 		return;
 	if((uint64_t)ptr >= (uint64_t)mmstruct.tiny_ptr && (uint64_t)ptr < mmstruct.tiny_max) {
 		free_zone(ptr, mmstruct.tiny_ptr, mmstruct.tiny_length);
-	} else if (ptr >= mmstruct.small_ptr && (uint64_t)ptr < mmstruct.small_max) {
+	} else if (ptr >= (void *)mmstruct.small_ptr && (uint64_t)ptr < mmstruct.small_max) {
 		//small zone
 	} else {
 		if (free_large(ptr) != SUCCESS)

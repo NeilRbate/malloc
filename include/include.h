@@ -38,22 +38,29 @@
 #define IS_ALLOCATED 1 << 0
 #define IS_INIT 1 << 8
 
+#define	STRUCT_SIZE	sizeof(l_ptr)
+#define	PAGE_QUANTITY	100
+
 /******************************PROTO*********************************/
 
 //Large allocation struct
 typedef struct {
 
-	void	*alloc_ptr;
-	void	*next;
-	size_t	size;
+	uint64_t	size;
+	void		*next;
+	void		*alloc_ptr;
 
 }	l_ptr;
+
+typedef struct {
+	uint64_t	block[8];
+	void		*next;
+}	s_ptr;
 
 //Memory_struct
 typedef	struct {
 
 	short	is_init;
-	short	page_quantity;
 
 	struct rlimit	rlim;
 
@@ -67,9 +74,8 @@ typedef	struct {
 	uint	small_length;
 	uint64_t	small_max;
 
-	void	*tiny_ptr;
-	void	*small_ptr;
-
+	s_ptr	*tiny_ptr;
+	s_ptr	*small_ptr;
 	l_ptr	*large_ptr;
 
 }	memory_struct;
@@ -85,17 +91,18 @@ void
 /*
  * Free Prototype
  */
-/*
 void	
 free(void *ptr);
-*/
 
 
-/*
- * Init memory structure and page
- */
-int	
-init_memory_page();
+s_ptr	
+*init_tiny();
+
+s_ptr
+*init_small();
+
+int
+init_mmstruct();
 
 /*
  * Display allocation zone memory address and map
