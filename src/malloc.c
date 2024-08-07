@@ -28,7 +28,22 @@ large_alloc(size_t size)
 static void
 *small_alloc(size_t size)
 {
-	(void)size;
+
+	s_ptr	*current = mmstruct.small_ptr;
+
+	while(1) {
+
+		if (current->size == NOT_ALLOCATED) {
+			current->size = size;
+			return (void *)current->block_ptr;
+		} else if (!current->next) {
+			if (!(current->next = init_small()))
+				return ALLOC_FAILURE;
+		}
+
+		current = current->next;
+	}
+
 	return ALLOC_FAILURE;
 }
 
@@ -36,7 +51,21 @@ static void
 static void
 *tiny_alloc(size_t size)
 {
-	(void)size;
+	s_ptr	*current = mmstruct.tiny_ptr;
+
+	while(1) {
+
+		if (current->size == NOT_ALLOCATED) {
+			current->size = size;
+			return (void *)current->block_ptr;
+		} else if (!current->next) {
+			if (!(current->next = init_tiny()))
+				return ALLOC_FAILURE;
+		}
+
+		current = current->next;
+	}
+
 	return ALLOC_FAILURE;
 }
 
@@ -50,11 +79,11 @@ void
 		if (init_mmstruct() != SUCCESS)
 			goto failure;
 
-	if (size <= mmstruct.tiny_sysconf) {
+	if (size <= TINY_BLOCK_SIZE) {
 		if (mmstruct.tiny_ptr == NULL)
 			mmstruct.tiny_ptr = init_tiny();
 		return tiny_alloc(size);
-	} else if (size <= mmstruct.small_sysconf) {
+	} else if (size <= SMALL_BLOCK_SIZE) {
 		if (mmstruct.small_ptr == NULL)
 			mmstruct.small_ptr = init_small();
 		return small_alloc(size);

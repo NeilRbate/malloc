@@ -1,5 +1,5 @@
 #include "../include/include.h"
-
+/*
 static uint
 free_zone(void *ptr, void *mmap, uint64_t zone_size)
 {
@@ -50,9 +50,12 @@ free_large(void *ptr) {
 	return FAILURE;
 }
 
+*/
 void	
 free(void *ptr)
 {
+	(void)ptr;
+	/*
 	if (!ptr)
 		return;
 	if((uint64_t)ptr >= (uint64_t)mmstruct.tiny_ptr && (uint64_t)ptr < mmstruct.tiny_max) {
@@ -63,6 +66,7 @@ free(void *ptr)
 		if (free_large(ptr) != SUCCESS)
 			ft_printf("free(): invalid pointer");
 	}
+	*/
 
 
 }

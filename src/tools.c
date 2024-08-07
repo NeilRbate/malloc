@@ -24,6 +24,7 @@ show_large_alloc()
 static	void
 show_small_alloc()
 {
+	/*
 	uint	i = 0;
 	s_ptr	*current;
 
@@ -39,11 +40,13 @@ show_small_alloc()
 		}
 		current = current->next;
 	}
+	*/
 }
 
 static	void
 show_tiny_alloc()
 {
+	/*
 	uint	i = 0;
 	s_ptr	*current;
 
@@ -58,6 +61,7 @@ show_tiny_alloc()
 		}
 		current = current->next;
 	}
+	*/
 }
 
 void

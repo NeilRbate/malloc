@@ -3,29 +3,35 @@
 s_ptr
 *init_small()
 {
-	void	*small;
-	uint64_t	i = 0;
 
-	if(mmstruct.rlim.rlim_max < mmstruct.small_length)
-		goto failure;
+	void		*small;
+	uint64_t	i = 1, block_start = 0;
+	s_ptr		*current;
 
-	small = mmap(NULL, mmstruct.small_length,
+	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
+    	if (mmstruct.small_length > mmstruct.rlim.rlim_max)
+        	goto failure;
+
+	small = mmap(NULL, mmstruct.small_length, 
 			PROT_READ | PROT_WRITE , 
 			MAP_PRIVATE | MAP_ANON, -1, 0);
 
 	if (small == MAP_FAILED)
 		goto failure;
 
-	while (i < mmstruct.small_length) {
-		if (((small + i) + mmstruct.small_page_size) 
-				>= small + mmstruct.small_length)
-			((s_ptr *)(small + i))->next = NULL;
-		else
-			((s_ptr *)(small + i))->next = (small + i) + mmstruct.small_page_size;
-		for(int j = 0; j < 16; j++) 
-			((s_ptr *)(small + i))->block[j] = 0;
-		i += mmstruct.small_page_size;
+	current = (s_ptr *)small;
+	block_start = (uint64_t)current + sizeof(s_ptr) * 101;
+	while (i <= 100) {
+		current->block_ptr = block_start;
+		current->size = 0;
+		current->next = (void *)((uint64_t)current) + sizeof(s_ptr);
+		block_start += SMALL_BLOCK_SIZE;
+		i++;
+		if (i <= 100)
+			current = current->next;
 	}
+
+	current->next = NULL;
 
 	return small;
 
@@ -36,8 +42,13 @@ failure:
 s_ptr
 *init_tiny()
 {
-	void	*tiny;
-	uint64_t	i = 0;
+	void		*tiny;
+	uint64_t	i = 1, block_start = 0;
+	s_ptr		*current;
+
+	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
+    	if (mmstruct.tiny_length > mmstruct.rlim.rlim_max)
+        	goto failure;
 
 	if(mmstruct.rlim.rlim_max < mmstruct.tiny_length)
 		goto failure;
@@ -49,22 +60,24 @@ s_ptr
 	if (tiny == MAP_FAILED)
 		goto failure;
 
-	while (i < mmstruct.tiny_length) {
-		if (((tiny + i) + mmstruct.tiny_page_size) 
-				>= tiny + mmstruct.tiny_length)
-			((s_ptr *)(tiny + i))->next = NULL;
-		else
-			((s_ptr *)(tiny + i))->next = (tiny + i) + mmstruct.tiny_page_size;
-		for(int j = 0; j < 16; j++) 
-			((s_ptr *)(tiny + i))->block[j] = 0;
-		i += mmstruct.tiny_page_size;
+	current = (s_ptr *)tiny;
+	block_start = (uint64_t)current + sizeof(s_ptr) * 101;
+	while (i <= 100) {
+		current->block_ptr = block_start;
+		current->size = 0;
+		current->next = (void *)((uint64_t)current) + sizeof(s_ptr);
+		block_start += TINY_BLOCK_SIZE;
+		i++;
+		if (i <= 100)
+			current = current->next;
 	}
+
+	current->next = NULL;
 
 	return tiny;
 
 failure:
 	return ALLOC_FAILURE;
-
 }
 
 int
@@ -74,13 +87,20 @@ init_mmstruct()
 	if (getrlimit(RLIMIT_DATA, &mmstruct.rlim) != 0)
 		return INIT_FAILURE;
 
-	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 4;
-	mmstruct.tiny_page_size = mmstruct.tiny_sysconf + sizeof(s_ptr);
-	mmstruct.tiny_length = mmstruct.tiny_page_size * 100;
+	mmstruct.tiny_sysconf = sysconf(_SC_PAGESIZE) * 7; //256Bytes blocks 
+							   //100 Blocks per allocations + 100 s_ptr
+							   //28672 Bytes allocated
+							   //7 Pages reclaimed
+	mmstruct.tiny_length = mmstruct.tiny_sysconf;
+	mmstruct.tiny_block_size = (uint64_t)TINY_BLOCK_SIZE + (uint64_t)sizeof(s_ptr);
 
-	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 16;
-	mmstruct.small_page_size = mmstruct.small_sysconf + sizeof(s_ptr);
-	mmstruct.small_length = mmstruct.small_page_size * 100;
+
+	mmstruct.small_sysconf = sysconf(_SC_PAGESIZE) * 26; //1024Bytes blocks
+							     //100 Blocks per allocations + 100 s_ptr
+							     //106496 Bytes allocated
+							     //26 pages reclaimed
+	mmstruct.small_length = mmstruct.small_sysconf;
+	mmstruct.small_block_size = (uint64_t)SMALL_BLOCK_SIZE + (uint64_t)sizeof(s_ptr);
 
 	mmstruct.tiny_ptr = NULL;
 	mmstruct.small_ptr = NULL;

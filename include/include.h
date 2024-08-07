@@ -31,15 +31,17 @@
 #define FAILURE 0xDEAD
 
 #define MALLOC_FAIL	NULL
-#define INIT_FAILURE	1 << 3
 #define ALLOC_FAILURE	NULL
 
 #define NOT_ALLOCATED 0
-#define IS_ALLOCATED 1 << 0
-#define IS_INIT 1 << 8
+#define IS_ALLOCATED 1 << 32
+#define IS_INIT 1 << 1
+#define INIT_FAILURE	1 << 2
 
-#define	STRUCT_SIZE	sizeof(l_ptr)
-#define	PAGE_QUANTITY	100
+#define	STRUCT_SIZE		sizeof(l_ptr)
+#define TINY_BLOCK_SIZE		256
+#define	SMALL_BLOCK_SIZE	1024
+
 
 /******************************PROTO*********************************/
 
@@ -53,7 +55,8 @@ typedef struct {
 }	l_ptr;
 
 typedef struct {
-	uint64_t	block[8];
+	uint64_t	block_ptr;
+	uint64_t	size;
 	void		*next;
 }	s_ptr;
 
@@ -65,12 +68,12 @@ typedef	struct {
 	struct rlimit	rlim;
 
 	uint	tiny_sysconf; 
-	uint	tiny_page_size;
+	uint	tiny_block_size;
 	uint	tiny_length;
 	uint64_t	tiny_max;
 
 	uint	small_sysconf; 
-	uint	small_page_size;
+	uint	small_block_size;
 	uint	small_length;
 	uint64_t	small_max;
 
