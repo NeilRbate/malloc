@@ -27,21 +27,26 @@ free_zone(void *ptr, void *mmap, uint64_t zone_size)
 	return FAILURE;
 }
 
+*/
 static uint
 free_large(void *ptr) {
 
-	l_ptr	*current = mmstruct.large_ptr;
-	l_ptr	*next = mmstruct.large_ptr->next; 
+	l_ptr	*current = mmstruct.large_ptr, *next = NULL;
+	if (current)
+		next = mmstruct.large_ptr->next; 
 
 	if (current && current->alloc_ptr == ptr) {
 		mmstruct.large_ptr = next;
-		munmap(ptr - sizeof(l_ptr *), current->size + sizeof(l_ptr *));
+		int ret = munmap(current
+				, current->size);
+		return ret == 0 ? SUCCESS : FAILURE;
 	}
 
 	while(next) {
 		if (next->alloc_ptr == ptr) {
 			current->next = next->next;
-			munmap(ptr - sizeof(l_ptr *), next->size + sizeof(l_ptr *));
+			munmap(next, next->size);
+			next = NULL;
 			return SUCCESS;
 		}
 		current = next;
@@ -50,23 +55,19 @@ free_large(void *ptr) {
 	return FAILURE;
 }
 
-*/
 void	
 free(void *ptr)
 {
-	(void)ptr;
-	/*
 	if (!ptr)
 		return;
 	if((uint64_t)ptr >= (uint64_t)mmstruct.tiny_ptr && (uint64_t)ptr < mmstruct.tiny_max) {
-		free_zone(ptr, mmstruct.tiny_ptr, mmstruct.tiny_length);
+//		free_zone(ptr, mmstruct.tiny_ptr, mmstruct.tiny_length);
 	} else if (ptr >= (void *)mmstruct.small_ptr && (uint64_t)ptr < mmstruct.small_max) {
 		//small zone
 	} else {
 		if (free_large(ptr) != SUCCESS)
-			ft_printf("free(): invalid pointer");
+			ft_printf("free(): invalid pointer\n");
 	}
-	*/
 
 
 }

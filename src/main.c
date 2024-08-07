@@ -1,15 +1,19 @@
 #include "../include/include.h"
-
+#include <stdio.h>
 int	main()
 {
-	ft_printf("sizeof(s_ptr) %d\n", sizeof(s_ptr));
 	char *str;
 	int i = 0;
-	while (i < 100)
+	while (i < 1024)
 	{
-		str = (char*)malloc(1);
+		str = (char*)malloc(1024);
 		str[0] = 42;
+
 		i++;
 	}
-	//show_alloc_mem();
+	struct rusage r_usage;
+ 	getrusage(RUSAGE_SELF,&r_usage);
+  	printf("Memory usage: %ld kilobytes  %ld page reclaims\n",
+			r_usage.ru_maxrss, 
+			r_usage.ru_minflt);
 }

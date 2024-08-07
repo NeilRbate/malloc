@@ -5,7 +5,6 @@ memory_struct mmstruct;
 static uint64_t
 large_alloc(size_t size)
 {
-	//Check heap limit
 	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
     	if (size > mmstruct.rlim.rlim_max)
         	return FAILURE;
@@ -28,7 +27,6 @@ large_alloc(size_t size)
 static void
 *small_alloc(size_t size)
 {
-
 	s_ptr	*current = mmstruct.small_ptr;
 
 	while(1) {

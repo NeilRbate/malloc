@@ -15,7 +15,7 @@ show_large_alloc()
 				ptr,
 				ptr->alloc_ptr, 
 				ptr->alloc_ptr + ptr->size, 
-				ptr->alloc_ptr + ptr->size - ptr->alloc_ptr);
+				ptr->alloc_ptr + ptr->size - ptr->alloc_ptr - 32);
 		}
 		ptr = ptr->next;
 	}
@@ -24,23 +24,27 @@ show_large_alloc()
 static	void
 show_small_alloc()
 {
-	/*
 	uint	i = 0;
 	s_ptr	*current;
 
 	current = mmstruct.small_ptr;
 
 	while (current) {
-		if (current && current->block[0] != 0) {
+		if (current && current->size == NOT_ALLOCATED)
+			break;
+		if (current && current->size != NOT_ALLOCATED) {
 			if (i == 0) {
 				ft_printf("SMALL : [%p]\n", mmstruct.small_ptr);
 				i++;
 			}
-			ft_printf("        [%p]\n", current + sizeof(s_ptr));
+			ft_printf("        [%p]: [%p] - [%p] : %d Bytes\n", 
+				current,
+				current->block_ptr, 
+				current->block_ptr + current->size, 
+				current->block_ptr + current->size - current->block_ptr);
 		}
 		current = current->next;
 	}
-	*/
 }
 
 static	void

@@ -56,8 +56,8 @@ typedef struct {
 
 typedef struct {
 	uint64_t	block_ptr;
-	uint64_t	size;
 	void		*next;
+	size_t		size;
 }	s_ptr;
 
 //Memory_struct
