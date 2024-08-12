@@ -38,27 +38,26 @@
 #define IS_INIT 1 << 1
 #define INIT_FAILURE	1 << 2
 
-#define	STRUCT_SIZE		sizeof(l_ptr)
+#define	STRUCT_SIZE		sizeof(s_ptr)
 #define TINY_BLOCK_SIZE		256
 #define	SMALL_BLOCK_SIZE	1024
 
 
 /******************************PROTO*********************************/
 
-//Large allocation struct
-typedef struct {
-
-	uint64_t	size;
-	void		*next;
-	void		*alloc_ptr;
-
-}	l_ptr;
-
 typedef struct {
 	uint64_t	block_ptr;
 	void		*next;
 	size_t		size;
 }	s_ptr;
+
+#pragma pack(8)
+typedef struct small_zone {
+	void		*block_ptr[127];
+	size_t		size[127];
+	struct small_zone	*next;
+} small_zone_ptr;
+#pragma pack()
 
 //Memory_struct
 typedef	struct {
@@ -67,19 +66,17 @@ typedef	struct {
 
 	struct rlimit	rlim;
 
-	uint	tiny_sysconf; 
 	uint	tiny_block_size;
 	uint	tiny_length;
 	uint64_t	tiny_max;
 
-	uint	small_sysconf; 
 	uint	small_block_size;
 	uint	small_length;
 	uint64_t	small_max;
 
 	s_ptr	*tiny_ptr;
-	s_ptr	*small_ptr;
-	l_ptr	*large_ptr;
+	small_zone_ptr	*small_ptr;
+	s_ptr	*large_ptr;
 
 }	memory_struct;
 
@@ -101,7 +98,7 @@ free(void *ptr);
 s_ptr	
 *init_tiny();
 
-s_ptr
+small_zone_ptr
 *init_small();
 
 int
@@ -122,8 +119,14 @@ void
 /*
  * Return last allocation struct on large zone
  */
-l_ptr
+s_ptr
 *get_last_alloc();
+
+/*
+ * Return number of block allocated per zone
+ */
+size_t	
+get_alloc_number(s_ptr *alloc);
 
 
 /******************************TOOLS*********************************/

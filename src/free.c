@@ -1,41 +1,13 @@
 #include "../include/include.h"
-/*
-static uint
-free_zone(void *ptr, void *mmap, uint64_t zone_size)
-{
-	uint64_t	i = 0,
-		       	*flag = 0;
 
-	while(i < zone_size) {
-		flag = (uint64_t *)((char *)mmap + i);
-		if (*flag != NOT_ALLOCATED) {
-			if ((uint64_t)flag + sizeof(uint64_t) == (uint64_t)ptr) {
-				ft_printf("free\n");
-				i += (sizeof(uint64_t) + *flag + 1);
-				if (i < zone_size)
-					ft_memmove((void *)flag
-							, mmap + i
-							, zone_size - i);
-				ft_printf("mmmouv\n");
-				return SUCCESS;
-			}
-			i += (sizeof(uint64_t) + *flag + 1);
-		} 
-		else
-			return FAILURE;
-	}
-	return FAILURE;
-}
-
-*/
-static uint
+static unsigned int
 free_large(void *ptr) {
 
-	l_ptr	*current = mmstruct.large_ptr, *next = NULL;
+	s_ptr	*current = mmstruct.large_ptr, *next = NULL;
 	if (current)
 		next = mmstruct.large_ptr->next; 
 
-	if (current && current->alloc_ptr == ptr) {
+	if (current && current->block_ptr == (uint64_t)ptr) {
 		mmstruct.large_ptr = next;
 		int ret = munmap(current
 				, current->size);
@@ -43,7 +15,7 @@ free_large(void *ptr) {
 	}
 
 	while(next) {
-		if (next->alloc_ptr == ptr) {
+		if (next->block_ptr == (uint64_t)ptr) {
 			current->next = next->next;
 			munmap(next, next->size);
 			next = NULL;
@@ -55,19 +27,50 @@ free_large(void *ptr) {
 	return FAILURE;
 }
 
+static unsigned int
+find_zone(void *ptr) {
+
+	s_ptr	*current = NULL;
+	uint64_t	i = 0;
+
+	current = mmstruct.tiny_ptr;
+
+	while (current) {
+		if (current && current->block_ptr == (uint64_t)ptr) {
+			current->size = NOT_ALLOCATED;
+			//TODO Defrag
+			return SUCCESS;
+		}
+		current = current->next;
+	}
+
+	small_zone_ptr	*header = mmstruct.small_ptr;
+
+	while (i < 127) {
+		if (header->block_ptr[i] == ptr) {
+			header->size[i] = NOT_ALLOCATED;
+			//TODO Defrag
+			return SUCCESS;
+		}
+		i++;
+		if(i == 127 && header->next != NULL) {
+			i = 0;
+			header = header->next;
+		}
+	}
+
+	return free_large(ptr);
+}
+
+
 void	
 free(void *ptr)
 {
+	//TODO Mutex lock
 	if (!ptr)
 		return;
-	if((uint64_t)ptr >= (uint64_t)mmstruct.tiny_ptr && (uint64_t)ptr < mmstruct.tiny_max) {
-//		free_zone(ptr, mmstruct.tiny_ptr, mmstruct.tiny_length);
-	} else if (ptr >= (void *)mmstruct.small_ptr && (uint64_t)ptr < mmstruct.small_max) {
-		//small zone
-	} else {
-		if (free_large(ptr) != SUCCESS)
-			ft_printf("free(): invalid pointer\n");
-	}
-
+	if (find_zone(ptr) != SUCCESS)
+		ft_printf("free(): invalid pointer\n");
+	//TODO Mutex unlock
 
 }

@@ -11,14 +11,14 @@ large_alloc(size_t size)
 
 	if(mmstruct.large_ptr == NULL) {
 		mmstruct.large_ptr = large_mmap(size);
-		return mmstruct.large_ptr ? (uint64_t)mmstruct.large_ptr->alloc_ptr : FAILURE;
+		return mmstruct.large_ptr ? (uint64_t)mmstruct.large_ptr->block_ptr : FAILURE;
 	} else {
 		void	*alloc = get_last_alloc();
 		if (!alloc)
 			return FAILURE;
-		((l_ptr *)alloc)->next = large_mmap(size);
-		alloc = ((l_ptr *)alloc)->next;
-		return alloc ? (uint64_t)((l_ptr *)alloc)->alloc_ptr : FAILURE;
+		((s_ptr *)alloc)->next = large_mmap(size);
+		alloc = ((s_ptr *)alloc)->next;
+		return alloc ? (uint64_t)((s_ptr *)alloc)->block_ptr : FAILURE;
 	}
 	
 	return FAILURE;
@@ -27,19 +27,23 @@ large_alloc(size_t size)
 static void
 *small_alloc(size_t size)
 {
-	s_ptr	*current = mmstruct.small_ptr;
+	small_zone_ptr	*current = mmstruct.small_ptr;
+	size_t		i = 0;
 
-	while(1) {
+	while(i < 127) {
 
-		if (current->size == NOT_ALLOCATED) {
-			current->size = size;
-			return (void *)current->block_ptr;
-		} else if (!current->next) {
-			if (!(current->next = init_small()))
+		if (current->size[i] == NOT_ALLOCATED) {
+			current->size[i] = size;
+			return current->block_ptr[i];
+		}
+		i++;
+	       	if (i == 127) {
+			if (current->next == NULL && !(current->next = init_small()))
 				return ALLOC_FAILURE;
+			i = 0;
+			current = current->next;
 		}
 
-		current = current->next;
 	}
 
 	return ALLOC_FAILURE;
@@ -72,6 +76,8 @@ void
 {
 	if (size < 1)
 		goto failure;
+
+	size = (size + 15) & ~15;
 
 	if (mmstruct.is_init != IS_INIT)
 		if (init_mmstruct() != SUCCESS)
