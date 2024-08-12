@@ -46,14 +46,14 @@ find_zone(void *ptr) {
 
 	small_zone_ptr	*header = mmstruct.small_ptr;
 
-	while (i < 127) {
+	while (i < 125) {
 		if (header->block_ptr[i] == ptr) {
 			header->size[i] = NOT_ALLOCATED;
 			//TODO Defrag
 			return SUCCESS;
 		}
 		i++;
-		if(i == 127 && header->next != NULL) {
+		if(i == 125 && header->next != NULL) {
 			i = 0;
 			header = header->next;
 		}

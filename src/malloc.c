@@ -30,20 +30,19 @@ static void
 	small_zone_ptr	*current = mmstruct.small_ptr;
 	size_t		i = 0;
 
-	while(i < 127) {
+	while(i < 125) {
 
 		if (current->size[i] == NOT_ALLOCATED) {
 			current->size[i] = size;
 			return current->block_ptr[i];
 		}
 		i++;
-	       	if (i == 127) {
+	  if (i == 125) {
 			if (current->next == NULL && !(current->next = init_small()))
 				return ALLOC_FAILURE;
 			i = 0;
 			current = current->next;
 		}
-
 	}
 
 	return ALLOC_FAILURE;

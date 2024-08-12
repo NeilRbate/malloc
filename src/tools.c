@@ -30,7 +30,7 @@ show_small_alloc()
 
 	current = mmstruct.small_ptr;
 
-	while (i < 127) {
+	while (i < 125) {
 		if (current->size[i] == NOT_ALLOCATED)
 			break;
 		if (current->size[i] != NOT_ALLOCATED) {
@@ -44,7 +44,7 @@ show_small_alloc()
 				current->block_ptr[i] + current->size[i] - current->block_ptr[i]);
 		}
 		i++;
-		if (i == 127 && current->next != NULL) {
+		if (i == 125 && current->next != NULL) {
 			i = 0;
 			current = current->next;
 		}

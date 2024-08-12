@@ -22,9 +22,8 @@ small_zone_ptr
 
 	header = (small_zone_ptr *)small;
 	header->next = NULL;
-	block_start = (uint64_t)header + sizeof(small_zone_ptr);
-	block_start = (block_start + 15) & ~15;
-	while (i < 127) {
+	block_start += (uint64_t)header + 3072;
+	while (i < 125) {
 		header->block_ptr[i] = (void *)block_start;
 		block_start += SMALL_BLOCK_SIZE;
 		i++;
@@ -87,7 +86,8 @@ init_mmstruct()
 	mmstruct.tiny_block_size = (uint64_t)TINY_BLOCK_SIZE;
 
 
-	mmstruct.small_length = (sysconf(_SC_PAGESIZE) * 32); //1024Bytes blocks
+	mmstruct.small_length = (sysconf(_SC_PAGESIZE) * 32); 
+									 //1024Bytes blocks
 							     //125 Blocks 128000 Bytes
 							     //125 s_ptr = 3000 Bytes
 							     //32 pages reclaimed

@@ -51,13 +51,11 @@ typedef struct {
 	size_t		size;
 }	s_ptr;
 
-#pragma pack(8)
 typedef struct small_zone {
-	void		*block_ptr[127];
-	size_t		size[127];
+	void		*block_ptr[125];
+	uint64_t		size[125];
 	struct small_zone	*next;
 } small_zone_ptr;
-#pragma pack()
 
 //Memory_struct
 typedef	struct {
