@@ -21,6 +21,9 @@
 //For sysconf
 #include <unistd.h>
 
+//For memory_dump
+#include <stdio.h>
+
 
 /******************************DEFINE ZONE***************************/
 
@@ -143,7 +146,15 @@ void
  * Show memory block in hexa
  */
 void
-show_memory_dump(short zone_type);
+show_memory_dump(void *ptr);
+
+/*
+ * Erase all data on ptr and free them, it's a secure process 
+ * who destroy the possibility to reed data from freed pointer
+ */
+void
+secure_free(void *ptr);
+
 
 
 

@@ -21,8 +21,7 @@ small_zone_ptr
 	block_start = (uint64_t)header + sizeof(small_zone_ptr) + 40;
 	while (i < SMALL_BLOCK_COUNT) {
 		header->block_ptr[i] = (void *)block_start;
-		header->size[i] = NOT_ALLOCATED;
-		block_start += (uint64_t)SMALL_BLOCK_SIZE;
+		block_start += SMALL_BLOCK_SIZE;
 		i++;
 	}
 
@@ -54,7 +53,6 @@ tiny_zone_ptr
 	block_start = (uint64_t)header + sizeof(tiny_zone_ptr) + 184;
 	while (i < TINY_BLOCK_COUNT) {
 		header->block_ptr[i] = (void *)block_start;
-		header->size[i] = NOT_ALLOCATED;
 		block_start += TINY_BLOCK_SIZE;
 		i++;
 	}

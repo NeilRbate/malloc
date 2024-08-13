@@ -12,6 +12,9 @@ NAME = libft_malloc_${HOST}.so
 
 LINKNAME = libft_malloc.so
 
+
+MAIN = utils/main.c
+
 SRCS = src/malloc.c \
        src/init.c \
        src/tools.c \
@@ -38,6 +41,7 @@ ${NAME}: ${OBJS}
 
 clean:
 	@rm -f ${OBJS}
+	@rm -f utils/main.o
 	@make -C libft clean
 	@rm -f test
 
@@ -46,6 +50,9 @@ fclean: clean
 	@rm -f ${LINKNAME}
 	@make -C libft fclean
 
-re: fclean all
+re: fclean test #all
+
+test:	all
+	${CC} -g -o test ${MAIN} ${LIBFT} -Wl,-rpath=./ft_malloc -lft_malloc
 
 .PHONY: all clean fclean re
