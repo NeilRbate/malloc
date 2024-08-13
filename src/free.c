@@ -30,32 +30,36 @@ free_large(void *ptr) {
 static unsigned int
 find_zone(void *ptr) {
 
-	s_ptr	*current = NULL;
+	tiny_zone_ptr	*tiny_header = mmstruct.tiny_ptr;
 	uint64_t	i = 0;
 
-	current = mmstruct.tiny_ptr;
 
-	while (current) {
-		if (current && current->block_ptr == (uint64_t)ptr) {
-			current->size = NOT_ALLOCATED;
-			//TODO Defrag
-			return SUCCESS;
-		}
-		current = current->next;
-	}
-
-	small_zone_ptr	*header = mmstruct.small_ptr;
-
-	while (i < 125) {
-		if (header->block_ptr[i] == ptr) {
-			header->size[i] = NOT_ALLOCATED;
+	while (tiny_header && i < TINY_BLOCK_COUNT) {
+		if (tiny_header->block_ptr[i] == ptr) {
+			tiny_header->size[i] = NOT_ALLOCATED;
 			//TODO Defrag
 			return SUCCESS;
 		}
 		i++;
-		if(i == 125 && header->next != NULL) {
+		if (i == TINY_BLOCK_COUNT && tiny_header->next != NULL) {
 			i = 0;
-			header = header->next;
+			tiny_header = tiny_header->next;
+		}
+	}
+
+	small_zone_ptr	*small_header = mmstruct.small_ptr;
+	i = 0;
+
+	while (small_header && i < SMALL_BLOCK_COUNT) {
+		if (small_header->block_ptr[i] == ptr) {
+			small_header->size[i] = NOT_ALLOCATED;
+			//TODO Defrag
+			return SUCCESS;
+		}
+		i++;
+		if(i == SMALL_BLOCK_COUNT && small_header->next != NULL) {
+			i = 0;
+			small_header = small_header->next;
 		}
 	}
 

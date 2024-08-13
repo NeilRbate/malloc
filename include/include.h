@@ -38,9 +38,11 @@
 #define IS_INIT 1 << 1
 #define INIT_FAILURE	1 << 2
 
-#define	STRUCT_SIZE		sizeof(s_ptr)
 #define TINY_BLOCK_SIZE		256
 #define	SMALL_BLOCK_SIZE	1024
+
+#define TINY_BLOCK_COUNT	116
+#define SMALL_BLOCK_COUNT	125
 
 
 /******************************PROTO*********************************/
@@ -52,10 +54,16 @@ typedef struct {
 }	s_ptr;
 
 typedef struct small_zone {
-	void		*block_ptr[125];
-	uint64_t		size[125];
+	void		*block_ptr[SMALL_BLOCK_COUNT];
+	uint64_t		size[SMALL_BLOCK_COUNT];
 	struct small_zone	*next;
 } small_zone_ptr;
+
+typedef struct tiny_zone {
+	void		*block_ptr[TINY_BLOCK_COUNT];
+	uint64_t		size[TINY_BLOCK_COUNT];
+	struct tiny_zone	*next;
+} tiny_zone_ptr;
 
 //Memory_struct
 typedef	struct {
@@ -64,15 +72,13 @@ typedef	struct {
 
 	struct rlimit	rlim;
 
-	uint	tiny_block_size;
 	uint	tiny_length;
 	uint64_t	tiny_max;
 
-	uint	small_block_size;
 	uint	small_length;
 	uint64_t	small_max;
 
-	s_ptr	*tiny_ptr;
+	tiny_zone_ptr	*tiny_ptr;
 	small_zone_ptr	*small_ptr;
 	s_ptr	*large_ptr;
 
@@ -93,7 +99,7 @@ void
 free(void *ptr);
 
 
-s_ptr	
+tiny_zone_ptr	
 *init_tiny();
 
 small_zone_ptr

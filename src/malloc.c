@@ -30,14 +30,14 @@ static void
 	small_zone_ptr	*current = mmstruct.small_ptr;
 	size_t		i = 0;
 
-	while(i < 125) {
+	while(i < SMALL_BLOCK_COUNT) {
 
 		if (current->size[i] == NOT_ALLOCATED) {
 			current->size[i] = size;
 			return current->block_ptr[i];
 		}
 		i++;
-	  if (i == 125) {
+	  if (i == SMALL_BLOCK_COUNT) {
 			if (current->next == NULL && !(current->next = init_small()))
 				return ALLOC_FAILURE;
 			i = 0;
@@ -52,19 +52,23 @@ static void
 static void
 *tiny_alloc(size_t size)
 {
-	s_ptr	*current = mmstruct.tiny_ptr;
 
-	while(1) {
+	tiny_zone_ptr	*current = mmstruct.tiny_ptr;
+	size_t		i = 0;
 
-		if (current->size == NOT_ALLOCATED) {
-			current->size = size;
-			return (void *)current->block_ptr;
-		} else if (!current->next) {
-			if (!(current->next = init_tiny()))
-				return ALLOC_FAILURE;
+	while(i < TINY_BLOCK_COUNT) {
+
+		if (current->size[i] == NOT_ALLOCATED) {
+			current->size[i] = size;
+			return current->block_ptr[i];
 		}
-
-		current = current->next;
+		i++;
+	  if (i == TINY_BLOCK_COUNT) {
+			if (current->next == NULL && !(current->next = init_tiny()))
+				return ALLOC_FAILURE;
+			i = 0;
+			current = current->next;
+		}
 	}
 
 	return ALLOC_FAILURE;
@@ -76,11 +80,12 @@ void
 	if (size < 1)
 		goto failure;
 
-	size = (size + 15) & ~15;
 
 	if (mmstruct.is_init != IS_INIT)
 		if (init_mmstruct() != SUCCESS)
 			goto failure;
+
+	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
 
 	if (size <= TINY_BLOCK_SIZE) {
 		if (mmstruct.tiny_ptr == NULL)

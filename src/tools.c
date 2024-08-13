@@ -28,9 +28,12 @@ show_small_alloc()
 	uint	i = 0;
 	small_zone_ptr	*current;
 
+	if (!mmstruct.small_ptr)
+		return;
+
 	current = mmstruct.small_ptr;
 
-	while (i < 125) {
+	while (i < SMALL_BLOCK_COUNT) {
 		if (current->size[i] == NOT_ALLOCATED)
 			break;
 		if (current->size[i] != NOT_ALLOCATED) {
@@ -44,7 +47,7 @@ show_small_alloc()
 				current->block_ptr[i] + current->size[i] - current->block_ptr[i]);
 		}
 		i++;
-		if (i == 125 && current->next != NULL) {
+		if (i == SMALL_BLOCK_COUNT && current->next != NULL) {
 			i = 0;
 			current = current->next;
 		}
@@ -56,25 +59,31 @@ show_tiny_alloc()
 {
 
 	uint	i = 0;
-	s_ptr	*current;
+	tiny_zone_ptr	*current;
 
 	current = mmstruct.tiny_ptr;
 
-	while (current) {
-		if (current && current->size == NOT_ALLOCATED)
+	if (!mmstruct.tiny_ptr)
+		return;
+
+	while (i < TINY_BLOCK_COUNT) {
+		if (current->size[i] == NOT_ALLOCATED)
 			break;
-		if (current && current->size != NOT_ALLOCATED) {
+		if (current->size[i] != NOT_ALLOCATED) {
 			if (i == 0) {
 				ft_printf("TINY  : [%p]\n", mmstruct.tiny_ptr);
-				i++;
 			}
 			ft_printf("        [%p]: [%p] - [%p] : %d Bytes\n", 
 				current,
-				current->block_ptr, 
-				current->block_ptr + current->size, 
-				current->block_ptr + current->size - current->block_ptr);
+				current->block_ptr[i], 
+				current->block_ptr[i] + current->size[i], 
+				current->block_ptr[i] + current->size[i] - current->block_ptr[i]);
 		}
-		current = current->next;
+		i++;
+		if (i == TINY_BLOCK_COUNT && current->next != NULL) {
+			i = 0;
+			current = current->next;
+		}
 	}
 }
 
