@@ -22,7 +22,8 @@ SRCS = src/malloc.c \
        src/free.c \
        src/realloc.c \
        src/calloc.c \
-       src/memory_dump.c
+       src/memory_dump.c \
+			 src/log.c
 
 LIBFT = -L. libft/libft.a
 

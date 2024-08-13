@@ -21,5 +21,6 @@ secure_free(void *ptr)
 
 	bzero(zone.ptr, zone.size);
 	thread_free(ptr);
+	write_log(SECURE_FREE, size)
 	pthread_mutex_unlock(&mutex);
 }

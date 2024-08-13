@@ -86,6 +86,8 @@ free(void *ptr)
 	}
 	if (find_zone(ptr) != SUCCESS)
 		ft_printf("free(): invalid pointer\n");
+
+	write_log(FREE, 0);
 	pthread_mutex_unlock(&mutex);
 
 }

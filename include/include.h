@@ -24,6 +24,13 @@
 //For memory_dump
 #include <stdio.h>
 
+//For log file (open + time)
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+
 
 /******************************DEFINE ZONE***************************/
 
@@ -48,6 +55,11 @@
 #define SMALL_ZONE	1 << 5
 #define LARGE_ZONE	1 << 6
 #define	ALL_ZONE	1 << 7
+#define MALLOC	1 << 0
+#define CALLOC	1 << 1
+#define REALLOC 1 << 2
+#define FREE    1 << 3
+#define SECURE_FREE 1 << 4
 
 #define TINY_BLOCK_SIZE		256
 #define	SMALL_BLOCK_SIZE	1024
@@ -154,6 +166,13 @@ show_memory_dump(void *ptr);
  */
 void
 secure_free(void *ptr);
+
+/*
+ * Create log file and add informations for each actions
+ */
+void	
+write_log(short process, size_t size);
+
 
 
 

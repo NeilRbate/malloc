@@ -101,16 +101,19 @@ void
 
 		case TINY_FLAG:
 			ret = realloc_tiny(zone, size);
+			write_log(REALLOC, size);
 			pthread_mutex_unlock(&mutex);
 			return ret;
 		
 		case SMALL_FLAG:
 			ret = realloc_small(zone, size);
+			write_log(REALLOC, size);
 			pthread_mutex_unlock(&mutex);
 			return ret;
 
 		case LARGE_FLAG:
 			ret = realloc_large(zone, size);
+			write_log(REALLOC, size);
 			pthread_mutex_unlock(&mutex);
 			return ret;
 	}

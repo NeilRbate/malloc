@@ -126,12 +126,14 @@ void
 		if (mmstruct.tiny_ptr == NULL)
 			mmstruct.tiny_ptr = init_tiny();
 		ptr = tiny_alloc(size);
+		write_log(MALLOC, size);
 		pthread_mutex_unlock(&mutex);
 		return ptr;
 	} else if (size <= SMALL_BLOCK_SIZE) {
 		if (mmstruct.small_ptr == NULL)
 			mmstruct.small_ptr = init_small();
 		ptr = small_alloc(size);
+		write_log(MALLOC, size);
 		pthread_mutex_unlock(&mutex);
 		return ptr;
 	} else {
@@ -139,6 +141,7 @@ void
 		if (large_ptr == FAILURE)
 			goto failure;
 
+		write_log(MALLOC, size);
 		pthread_mutex_unlock(&mutex);
 		return (void *)large_ptr;
 	}
