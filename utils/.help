@@ -1,0 +1,3 @@
+Compile:
+
+	gcc FILE.c -L../ -l ft_malloc

@@ -37,6 +37,14 @@
 #define IS_ALLOCATED 1 << 32
 #define IS_INIT 1 << 1
 #define INIT_FAILURE	1 << 2
+#define	TINY_FLAG	1 << 0
+#define	SMALL_FLAG	1 << 1
+#define	LARGE_FLAG	1 << 2
+#define	NO_ZONE		1 << 3
+#define	TINY_ZONE	1 << 4
+#define SMALL_ZONE	1 << 5
+#define LARGE_ZONE	1 << 6
+#define	ALL_ZONE	1 << 7
 
 #define TINY_BLOCK_SIZE		256
 #define	SMALL_BLOCK_SIZE	1024
@@ -65,6 +73,12 @@ typedef struct tiny_zone {
 	struct tiny_zone	*next;
 } tiny_zone_ptr;
 
+typedef	struct {
+	short	zone;
+	size_t	size;
+	void	*ptr;
+}	alloc_zone;
+
 //Memory_struct
 typedef	struct {
 
@@ -84,7 +98,9 @@ typedef	struct {
 
 }	memory_struct;
 
+/* GLOBAL */
 extern	memory_struct	mmstruct;
+extern	pthread_mutex_t    mutex;
 
 /*
  * Malloc Prototype
@@ -93,10 +109,42 @@ void
 *malloc(size_t size);
 
 /*
+ * no thrad-safe malloc, using with realloc because realloc is thread-safe
+ */
+void
+*thread_malloc(size_t size);
+
+
+/*
  * Free Prototype
  */
 void	
 free(void *ptr);
+
+/*
+ * no thread safe free, using with realloc because realloc is thread-safe
+ */
+void
+thread_free(void *ptr);
+
+/*
+ * realloc prototype
+ */
+void	
+*realloc(void *ptr, size_t size);
+
+/*
+ * Calloc bonus 
+ */
+void
+*calloc(size_t nmemb, size_t size);
+
+/*
+ * Show memory block in hexa
+ */
+void
+show_memory_dump(short zone_type);
+
 
 
 tiny_zone_ptr	
@@ -131,6 +179,13 @@ s_ptr
  */
 size_t	
 get_alloc_number(s_ptr *alloc);
+
+/*
+ * Find the zone of ptr
+ */
+alloc_zone
+find_alloc_zone(void *ptr);
+
 
 
 /******************************TOOLS*********************************/

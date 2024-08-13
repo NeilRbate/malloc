@@ -37,7 +37,6 @@ find_zone(void *ptr) {
 	while (tiny_header && i < TINY_BLOCK_COUNT) {
 		if (tiny_header->block_ptr[i] == ptr) {
 			tiny_header->size[i] = NOT_ALLOCATED;
-			//TODO Defrag
 			return SUCCESS;
 		}
 		i++;
@@ -53,7 +52,6 @@ find_zone(void *ptr) {
 	while (small_header && i < SMALL_BLOCK_COUNT) {
 		if (small_header->block_ptr[i] == ptr) {
 			small_header->size[i] = NOT_ALLOCATED;
-			//TODO Defrag
 			return SUCCESS;
 		}
 		i++;
@@ -66,15 +64,27 @@ find_zone(void *ptr) {
 	return free_large(ptr);
 }
 
+void
+thread_free(void *ptr) 
+{
+	if (!ptr) 
+		return;
+	if (find_zone(ptr) != SUCCESS)
+		ft_printf("free(): invalid pointer\n");
+}
 
 void	
 free(void *ptr)
 {
-	//TODO Mutex lock
-	if (!ptr)
+	if (pthread_mutex_lock(&mutex) != 0)
 		return;
+
+	if (!ptr) {
+		pthread_mutex_unlock(&mutex);
+		return;
+	}
 	if (find_zone(ptr) != SUCCESS)
 		ft_printf("free(): invalid pointer\n");
-	//TODO Mutex unlock
+	pthread_mutex_unlock(&mutex);
 
 }

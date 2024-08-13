@@ -21,6 +21,7 @@ small_zone_ptr
 	block_start = (uint64_t)header + sizeof(small_zone_ptr) + 40;
 	while (i < SMALL_BLOCK_COUNT) {
 		header->block_ptr[i] = (void *)block_start;
+		header->size[i] = NOT_ALLOCATED;
 		block_start += (uint64_t)SMALL_BLOCK_SIZE;
 		i++;
 	}
@@ -35,32 +36,30 @@ tiny_zone_ptr
 *init_tiny()
 {
 
-	void		*tiny = NULL;
 	tiny_zone_ptr	*header = NULL;
 	uint64_t	i = 0, block_start = 0;
 
     	if (mmstruct.tiny_length > mmstruct.rlim.rlim_max)
         	goto failure;
 
-	tiny = mmap(NULL, mmstruct.tiny_length, 
+	header = (tiny_zone_ptr *)mmap(NULL, mmstruct.tiny_length, 
 			PROT_READ | PROT_WRITE , 
 			MAP_PRIVATE | MAP_ANON, -1, 0);
 
 
-	if (tiny == MAP_FAILED)
+	if (header == MAP_FAILED)
 		goto failure;
 
-	header = (tiny_zone_ptr *)tiny;
 	header->next = NULL;
-	//TODO Align this block
-	block_start += (uint64_t)header + 184;
+	block_start = (uint64_t)header + sizeof(tiny_zone_ptr) + 184;
 	while (i < TINY_BLOCK_COUNT) {
 		header->block_ptr[i] = (void *)block_start;
+		header->size[i] = NOT_ALLOCATED;
 		block_start += TINY_BLOCK_SIZE;
 		i++;
 	}
 
-	return tiny;
+	return header;
 
 failure:
 	return ALLOC_FAILURE;

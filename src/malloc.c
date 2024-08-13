@@ -1,6 +1,7 @@
 #include "../include/include.h"
 
 memory_struct mmstruct;
+pthread_mutex_t	mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static uint64_t
 large_alloc(size_t size)
@@ -63,7 +64,7 @@ static void
 			return current->block_ptr[i];
 		}
 		i++;
-	  if (i == TINY_BLOCK_COUNT) {
+	  	if (i == TINY_BLOCK_COUNT) {
 			if (current->next == NULL && !(current->next = init_tiny()))
 				return ALLOC_FAILURE;
 			i = 0;
@@ -74,12 +75,11 @@ static void
 	return ALLOC_FAILURE;
 }
 
-void	
-*malloc(size_t size)
+void
+*thread_malloc(size_t size)
 {
 	if (size < 1)
 		goto failure;
-
 
 	if (mmstruct.is_init != IS_INIT)
 		if (init_mmstruct() != SUCCESS)
@@ -97,9 +97,53 @@ void
 		return small_alloc(size);
 	} else {
 		uint64_t	large_ptr = large_alloc(size);
-		return (large_ptr != FAILURE ? (void *)large_ptr : NULL);
+		if (large_ptr == FAILURE)
+			return NULL;
+		return (void *)large_ptr;
 	}
 
 failure:
+	return MALLOC_FAIL;
+}
+
+void	
+*malloc(size_t size)
+{
+
+	if (pthread_mutex_lock(&mutex) != 0)
+		return MALLOC_FAIL;
+	if (size < 1)
+		goto failure;
+
+	if (mmstruct.is_init != IS_INIT)
+		if (init_mmstruct() != SUCCESS)
+			goto failure;
+
+	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
+
+	void *ptr = NULL;
+	if (size <= TINY_BLOCK_SIZE) {
+		if (mmstruct.tiny_ptr == NULL)
+			mmstruct.tiny_ptr = init_tiny();
+		ptr = tiny_alloc(size);
+		pthread_mutex_unlock(&mutex);
+		return ptr;
+	} else if (size <= SMALL_BLOCK_SIZE) {
+		if (mmstruct.small_ptr == NULL)
+			mmstruct.small_ptr = init_small();
+		ptr = small_alloc(size);
+		pthread_mutex_unlock(&mutex);
+		return ptr;
+	} else {
+		uint64_t	large_ptr = large_alloc(size);
+		if (large_ptr == FAILURE)
+			goto failure;
+
+		pthread_mutex_unlock(&mutex);
+		return (void *)large_ptr;
+	}
+
+failure:
+	pthread_mutex_unlock(&mutex);
 	return MALLOC_FAIL;
 }

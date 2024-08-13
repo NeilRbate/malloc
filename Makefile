@@ -16,9 +16,10 @@ SRCS = src/malloc.c \
        src/init.c \
        src/tools.c \
        src/largealloc.c \
-       src/free.c
-
-MAIN = src/main.c
+       src/free.c \
+       src/realloc.c \
+       src/calloc.c \
+       src/memory_dump.c
 
 LIBFT = -L. libft/libft.a
 
@@ -37,7 +38,6 @@ ${NAME}: ${OBJS}
 
 clean:
 	@rm -f ${OBJS}
-	@rm -f src/main.o
 	@make -C libft clean
 	@rm -f test
 
@@ -46,9 +46,6 @@ fclean: clean
 	@rm -f ${LINKNAME}
 	@make -C libft fclean
 
-re: fclean test #all
-
-test:	all	
-	${CC} ${CFLAGS} -o test ${MAIN} ${LIBFT} -Wl,-rpath=./ft_malloc -lft_malloc
+re: fclean all
 
 .PHONY: all clean fclean re
