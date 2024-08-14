@@ -92,6 +92,8 @@ typedef	struct {
 	short	zone;
 	size_t	size;
 	void	*ptr;
+	void	*header;
+	int	ndx;
 }	alloc_zone;
 
 //Memory_struct
@@ -171,7 +173,7 @@ secure_free(void *ptr);
  * Create log file and add informations for each actions
  */
 void	
-write_log(short process, size_t size);
+write_log(char * options, short process, size_t size);
 
 
 

@@ -23,7 +23,8 @@ SRCS = src/malloc.c \
        src/realloc.c \
        src/calloc.c \
        src/memory_dump.c \
-			 src/log.c
+       src/log.c \
+       src/secure_free.c
 
 LIBFT = -L. libft/libft.a
 
@@ -45,6 +46,7 @@ clean:
 	@rm -f utils/main.o
 	@make -C libft clean
 	@rm -f test
+	@rm -f log_file
 
 fclean: clean
 	@rm -f ${NAME}

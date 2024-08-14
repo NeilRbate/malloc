@@ -84,10 +84,12 @@ free(void *ptr)
 		pthread_mutex_unlock(&mutex);
 		return;
 	}
-	if (find_zone(ptr) != SUCCESS)
+	if (find_zone(ptr) != SUCCESS) {
 		ft_printf("free(): invalid pointer\n");
-
-	write_log(FREE, 0);
+		write_log("FAILURE", FREE, 0);
+	} 
+	else 
+		write_log(NULL, FREE, 0);
 	pthread_mutex_unlock(&mutex);
 
 }

@@ -1,11 +1,14 @@
 #include "../include/include.h"
 
 static void
-*mmove_and_free(void *ptr,alloc_zone zone)
+*mmove_and_free(void *ptr,alloc_zone zone, size_t size)
 {
 	if (!ptr)
 		return ALLOC_FAILURE;
-	ft_memmove(ptr, zone.ptr, zone.size);
+	if (zone.size < size)
+		size = zone.size;
+
+	ft_memmove(ptr, zone.ptr, size);
 	thread_free(zone.ptr);
 	return ptr;
 }
@@ -15,20 +18,18 @@ static void
 {
 	void	*ptr = NULL;
 
-	if (size < zone.size)
-		zone.size = size;
-
-	if (size <= TINY_BLOCK_SIZE)
+	if (size <= TINY_BLOCK_SIZE) {
+		((tiny_zone_ptr *)zone.header)->size[zone.ndx]= size;
 		return zone.ptr;
-	else if (size <= SMALL_BLOCK_SIZE) {
+	} else if (size <= SMALL_BLOCK_SIZE) {
 		if (!(ptr = thread_malloc(size)))
 			goto failure;
-		return mmove_and_free(ptr, zone);
+		return mmove_and_free(ptr, zone, size);
 	}
 	
 	if (!(ptr = thread_malloc(size)))
 		goto failure;
-	return mmove_and_free(ptr, zone);
+	return mmove_and_free(ptr, zone, size);
 
 failure:
 	return ALLOC_FAILURE;
@@ -39,20 +40,19 @@ static void
 {
 	void	*ptr = NULL;
 
-	if (size < zone.size)
-		zone.size = size;
-
 	if (size <= TINY_BLOCK_SIZE) {
 		if (!(ptr = thread_malloc(size)))
 			goto failure;
-		return mmove_and_free(ptr, zone);
+		return mmove_and_free(ptr, zone, size);
 	}
-	else if (size <= SMALL_BLOCK_SIZE)
+	else if (size <= SMALL_BLOCK_SIZE) {
+		((small_zone_ptr *)zone.header)->size[zone.ndx]= size;
 		return zone.ptr;
+	}
 	
 	if (!(ptr = thread_malloc(size)))
 		goto failure;
-	return mmove_and_free(ptr, zone);
+	return mmove_and_free(ptr, zone, size);
 
 failure:
 	return ALLOC_FAILURE;
@@ -64,12 +64,9 @@ static void
 {
 	void	*ptr = NULL;
 
-	if (size < zone.size)
-		zone.size = size;
-
 	if (!(ptr = thread_malloc(size)))
 		goto failure;
-	return mmove_and_free(ptr, zone);
+	return mmove_and_free(ptr, zone, size);
 
 failure:
 	return ALLOC_FAILURE;
@@ -88,7 +85,7 @@ void
 	if (!ptr)
 		goto failure;
 	else if (size == 0) {
-		free(ptr);
+		thread_free(ptr);
 		goto failure;
 	}
 
@@ -101,24 +98,23 @@ void
 
 		case TINY_FLAG:
 			ret = realloc_tiny(zone, size);
-			write_log(REALLOC, size);
-			pthread_mutex_unlock(&mutex);
-			return ret;
+			break;
 		
 		case SMALL_FLAG:
 			ret = realloc_small(zone, size);
-			write_log(REALLOC, size);
-			pthread_mutex_unlock(&mutex);
-			return ret;
+			break;
 
 		case LARGE_FLAG:
 			ret = realloc_large(zone, size);
-			write_log(REALLOC, size);
-			pthread_mutex_unlock(&mutex);
-			return ret;
+			break;
 	}
 
+	write_log(NULL, REALLOC, size);
+	pthread_mutex_unlock(&mutex);
+	return ret;
+
 failure:
+	write_log("FAILURE", REALLOC, size);
 	pthread_mutex_unlock(&mutex);
 	return ALLOC_FAILURE;
 }

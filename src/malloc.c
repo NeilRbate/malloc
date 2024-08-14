@@ -109,6 +109,7 @@ failure:
 void	
 *malloc(size_t size)
 {
+	void *ptr = NULL;
 
 	if (pthread_mutex_lock(&mutex) != 0)
 		return MALLOC_FAIL;
@@ -121,32 +122,41 @@ void
 
 	getrlimit(RLIMIT_DATA, &mmstruct.rlim);
 
-	void *ptr = NULL;
 	if (size <= TINY_BLOCK_SIZE) {
+
 		if (mmstruct.tiny_ptr == NULL)
 			mmstruct.tiny_ptr = init_tiny();
+
 		ptr = tiny_alloc(size);
-		write_log(MALLOC, size);
+		write_log(NULL, MALLOC, size);
 		pthread_mutex_unlock(&mutex);
+
 		return ptr;
+
 	} else if (size <= SMALL_BLOCK_SIZE) {
+
 		if (mmstruct.small_ptr == NULL)
 			mmstruct.small_ptr = init_small();
+
 		ptr = small_alloc(size);
-		write_log(MALLOC, size);
+		write_log(NULL, MALLOC, size);
 		pthread_mutex_unlock(&mutex);
+
 		return ptr;
 	} else {
 		uint64_t	large_ptr = large_alloc(size);
+
 		if (large_ptr == FAILURE)
 			goto failure;
 
-		write_log(MALLOC, size);
+		write_log(NULL, MALLOC, size);
 		pthread_mutex_unlock(&mutex);
+
 		return (void *)large_ptr;
 	}
 
 failure:
+	write_log("FAILURE", MALLOC, size);
 	pthread_mutex_unlock(&mutex);
 	return MALLOC_FAIL;
 }

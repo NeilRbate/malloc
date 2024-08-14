@@ -11,7 +11,7 @@ show_large_alloc()
 			if (i == 0)
 				ft_printf(" LARGE:\n");
 			i++;
-			ft_printf("        [%p] : [%p] - [%p] : %u Bytes\n", 
+			ft_printf("        [%p]   [%p] - [%p] : %u Bytes\n", 
 				ptr,
 				ptr->block_ptr, 
 				ptr->block_ptr + ptr->size, 
@@ -141,7 +141,6 @@ static s_ptr
 	return NULL;
 }
 
-
 alloc_zone
 find_alloc_zone(void *ptr)
 {
@@ -155,6 +154,8 @@ find_alloc_zone(void *ptr)
 			zone.zone = TINY_FLAG;
 			zone.size = tiny_header->size[i];
 			zone.ptr = ptr;
+			zone.header = tiny_header;
+			zone.ndx = i;
 			return zone;
 		}
 		i++;
@@ -172,6 +173,9 @@ find_alloc_zone(void *ptr)
 			zone.zone = SMALL_FLAG;
 			zone.size = small_header->size[i];
 			zone.ptr = ptr;
+			zone.header = small_header;
+			zone.ndx = i;
+
 			return zone;
 		}
 		i++;

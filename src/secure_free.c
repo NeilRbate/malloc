@@ -16,11 +16,12 @@ secure_free(void *ptr)
 
 	if (zone.zone == NO_ZONE) {
 		ft_printf("secure_free(): invalid pointer\n");
+		write_log("FAILURE", REALLOC, 0);
 		pthread_mutex_unlock(&mutex);
 	}
 
-	bzero(zone.ptr, zone.size);
+	ft_bzero(zone.ptr, zone.size);
 	thread_free(ptr);
-	write_log(SECURE_FREE, size)
+	write_log(NULL, SECURE_FREE, 0);
 	pthread_mutex_unlock(&mutex);
 }
