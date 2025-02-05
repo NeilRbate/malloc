@@ -126,7 +126,7 @@ void
 *malloc(size_t size);
 
 /*
- * no thrad-safe malloc, using with realloc because realloc is thread-safe
+ * no thread-safe malloc, using with realloc because realloc is thread-safe
  */
 void
 *thread_malloc(size_t size);
